@@ -1,0 +1,7 @@
+build/
+node_modules/
+cordova/node_modules/
+cordova/platforms/
+cordova/plugins/
+.DS_Store
+manifest.yml
