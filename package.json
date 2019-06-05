@@ -7,8 +7,7 @@
     "test": "jest",
     "start": "webpack-dev-server --config ./config/webpack.config.js",
     "build": "webpack --config ./config/webpack.config.js",
-    "build:prod": "webpack --config ./config/webpack.config.prod.js",
-    "build:cordova": "webpack --config ./config/webpack.cordova.config.js"
+    "build:prod": "webpack --config ./config/webpack.config.prod.js"
   },
   "dependencies": {
     "path": "^0.12.7",
