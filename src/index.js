@@ -13,11 +13,7 @@ const render = Component => {
   )
 }
 
-if(!window.cordova) {
-  render(App);
-  if (module.hot) {
-    module.hot.accept('./components/App', () => { render(App) })
-  }
-} else {
-  document.addEventListener('deviceready', render(App), false)
+render(App);
+if (module.hot) {
+  module.hot.accept('./components/App', () => { render(App) })
 }
