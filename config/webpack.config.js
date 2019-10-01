@@ -1,6 +1,7 @@
-var path = require('path');
-var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
 
 const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
   template: './public/index.html',
@@ -24,8 +25,10 @@ module.exports = {
     rules: [
       { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
       { test: /\.jsx$/, loader: 'babel-loader', exclude: /node_modules/ },
-      { test: /\.sass$/, use: [{loader: "style-loader" }, {loader: "css-loader"}, {loader: "sass-loader"}], exclude: /node_modules/},
-      { test: /\.scss$/, use: [{loader: "style-loader" }, {loader: "css-loader"}, {loader: "sass-loader"}], exclude: /node_modules/}
+      { test: /\.css$/, use: [{loader: "style-loader" }, {loader: "css-loader"}, ]},
+      { test: /\.sass$/, use: [{loader: "style-loader" }, {loader: "css-loader"}, {loader: "sass-loader"}], exclude: /node_modules/ },
+      { test: /\.scss$/, use: [{loader: "style-loader" }, {loader: "css-loader"}, {loader: "sass-loader"}], exclude: /node_modules/ },
+      { test: /\.svg$/, loader: 'svg-inline-loader' },
     ]
   },
   devServer: {
@@ -43,7 +46,7 @@ module.exports = {
   plugins: [
     HtmlWebpackPluginConfig,
     new webpack.NamedModulesPlugin(), 
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
   ],
   resolve: {
     alias: {
