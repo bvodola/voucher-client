@@ -12,10 +12,10 @@ export default {
     width: '100%',
     top: 0,
     left: 0,
-    zIndex: 1,
+    zIndex: 2,
 
   },
   logoImage: {
-    height: '30px'
+    height: '40px'
   }
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux';
 import { getVoucher } from 'src/state/actions/vouchers'
+import { showAlert } from 'src/state/actions/alerts'
 import { Input, Icon, Button, Box, Alert, Loading } from  'src/components';
 import { H1, Label } from 'src/components/Text';
 import FadeIn from 'react-fade-in';
@@ -12,8 +13,10 @@ class VoucherInput extends React.Component {
   constructor(props) {
     super(props);
 
+    const cachedVoucherCode = localStorage.getItem('voucher_code') || '';
+
     this.state = {
-      voucherInput: props.selectedVoucher.code || '',
+      voucherInput: props.selectedVoucher.code || cachedVoucherCode || '',
       showErrorMessage: false,
       loading: false,
     }
@@ -32,7 +35,7 @@ class VoucherInput extends React.Component {
       if(!this.props.selectedVoucher.validated) this.props.history.push('/recompensas');
       else this.props.history.push('/voucher');
     } else {
-      this.setShowErrorMessage(true);
+      this.props.showAlert('danger', 'O código digitado não é válido. Por favor, tente novamente, ou se preferir, entre em contato.')
     }
   }
 
@@ -54,12 +57,12 @@ class VoucherInput extends React.Component {
         <form onSubmit={this.validateVoucher}>
           <Box padded>
             <Label>Código do Voucher</Label>
-            <Input placeholder="Exemplo: WAZ123" value={this.state.voucherInput} onChange={(ev) => this.setVoucherInput(ev.target.value)} />
-            <Alert danger show={this.state.showErrorMessage} close={() => this.setShowErrorMessage(false)}>
+            <Input required placeholder="Exemplo: WAZ123" value={this.state.voucherInput} onChange={(ev) => this.setVoucherInput(ev.target.value)} />
+            <Alert type='danger' transition='popup' show={this.state.showErrorMessage} close={() => this.setShowErrorMessage(false)}>
               <Icon>error</Icon>
-              <p>O código digitado não é válido. Por favor, tente novamente, ou se preferir, entre em contato.</p>
+              <p></p>
             </Alert>
-            <Button disabled={this.state.loading}>
+            <Button disabled={this.state.loading} type='submit'>
               {this.state.loading ? <React.Fragment><Loading size={20} /> Validando...</React.Fragment> : 'Validar Voucher'}
             </Button>
           </Box>
@@ -72,5 +75,6 @@ class VoucherInput extends React.Component {
 export default withRouter(connect((state) => ({
   selectedVoucher: state.vouchers.selectedVoucher
 }), {
-  getVoucher
+  getVoucher,
+  showAlert,
 })(VoucherInput));

@@ -1,6 +1,7 @@
-var path = require('path');
-var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
   template: './public/index.html',
@@ -9,31 +10,44 @@ const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
 })
 
 module.exports = {
+  mode: 'production',
   devtool: 'cheap-module-source-map',
   entry: [
     './src/index.js'
   ],
   output: {
-    path: path.resolve('build'),
+    path: path.resolve('../', 'server', 'client_bundle'),
     publicPath: '/',
     filename: 'bundle.js'
   },
   module: {
-    loaders: [
+    rules: [
       { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
-      { test: /\.jsx$/, loader: 'babel-loader', exclude: /node_modules/ }
+      { test: /\.jsx$/, loader: 'babel-loader', exclude: /node_modules/ },
+      { test: /\.css$/, use: [{loader: "style-loader" }, {loader: "css-loader"}, ]},
+      { test: /\.sass$/, use: [{loader: "style-loader" }, {loader: "css-loader"}, {loader: "sass-loader"}], exclude: /node_modules/ },
+      { test: /\.scss$/, use: [{loader: "style-loader" }, {loader: "css-loader"}, {loader: "sass-loader"}], exclude: /node_modules/ },
+      { test: /\.svg$/, loader: 'svg-inline-loader' },
+      { test: /\.(png|jpg|jpeg)$/, loader: 'file-loader?name=[path][name].[ext]!extract-loader!html-loader' },
     ]
+  },
+  optimization: {
+    minimize: true
   },
   plugins: [
     HtmlWebpackPluginConfig,
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: false,
-      mangle: false
-    }),
     new webpack.DefinePlugin({
       'process.env': {
         'NODE_ENV': JSON.stringify('production')
       }
-    })
-  ]
+    }),
+    new CopyWebpackPlugin([
+      { from: './public', to: './public' }
+    ])
+  ],
+  resolve: {
+    alias: {
+      src: path.resolve(__dirname, '../src')
+    }
+  }
 }

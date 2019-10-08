@@ -9,6 +9,7 @@ import { Card, Button, Modal, Icon, Stack, Loading } from  'src/components';
 import { H1, H2, H3, P } from 'src/components/Text';
 import { IconAndText } from 'src/components/Icon';
 import FadeIn from 'react-fade-in';
+import styled from 'styled-components';
 
 const Style = {
   rewardList: {
@@ -38,6 +39,42 @@ const Style = {
   }
 }
 
+const PointsHeading = styled(H3)`
+  color: #3c3c3c;
+  text-align: left;
+  font-size: 16px;
+  margin: 32px 0 -20px 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff;
+
+  @media (min-width: 700px) {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+`
+
+const LogoThumbnail = styled.div`
+  border-radius: 100%;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  width: 50px;
+  height: 50px;
+  padding: 3px;
+  display: flex;
+  margin-left: 76%;
+  margin-top: -78px;
+  margin-bottom: 45px;
+  z-index: 1;
+  position: relative;
+  overflow: hidden;
+
+  img {
+    align-self: center;
+    width: 100%;
+  }
+`
+
 class RewardList extends React.Component {
 
   constructor() {
@@ -64,16 +101,19 @@ class RewardList extends React.Component {
   }
 
   async selectReward(selectedReward) {
-    this.setState({isLoadingRewardSelection: true});
-    await this.props.selectVoucherReward(selectedReward);
-    this.setState({isLoadingRewardSelection: false});
-    this.props.history.push('/voucher');
+    const notEnoughPoints = this.state.selectedReward.points && this.props.selectedVoucher.points < this.state.selectedReward.points;
+    if(!notEnoughPoints) {
+      this.setState({isLoadingRewardSelection: true});
+      await this.props.selectVoucherReward(selectedReward);
+      this.setState({isLoadingRewardSelection: false});
+      this.props.history.push('/voucher');
+    }
   }
  
   async getRewards() {
     if (typeof this.props.selectedVoucher.points === 'number') {
       this.setState({isLoadingData: true});
-      const rewards = await api.getRewards({points_lte: this.props.selectedVoucher.points, stock_gte: 1});
+      const rewards = await api.getRewards({stock_gte: 1});
       this.setState({rewards}, () => {
         this.setState({isLoadingData: false});
       });
@@ -93,6 +133,20 @@ class RewardList extends React.Component {
   render() {
     const { selectedReward, isModalOpened, isLoadingRewardSelection } = this.state;
     const { selectedVoucher } = this.props;
+    const notEnoughPoints = selectedReward.points && selectedVoucher.points < selectedReward.points;
+
+    // Divide rewards in an object of categories of points
+    // Example: dividedRewards = [{points: 4, rewards: [...]}, {points: 6, rewards: [...]}, ...]
+    const pointCategories = [1,2,3,4,5,6,7,8,9,10];
+    let dividedRewards = [];
+    pointCategories.forEach(pc => {
+      dividedRewards.push( 
+        {
+          points: pc,
+          rewards: this.state.rewards.filter(r => r.points === pc)
+        }
+      )
+    });
 
     return (
       <div style={Style.rewardList}>
@@ -106,34 +160,56 @@ class RewardList extends React.Component {
           <H2>
             {selectedVoucher.validated ?
               <span>Atenção: este voucher já foi utlizado. <Link to='/voucher'>Clique aqui</Link> para acessá-lo ou <Link to='/'>valide outro código</Link></span>:
-              `Este voucher lhe dá o direito de escolher uma recompensa de até ${this.props.selectedVoucher.points} pontos`
+              `Este voucher lhe dá o direito de escolher uma recompensa de ${this.props.selectedVoucher.points} pontos`
             }
           </H2>
+          <Link to='/' style={{textDecoration: 'none', paddingLeft: '10px', display: 'block', cursor: 'pointer'}}>
+            <IconAndText>
+              <Icon>chevron_left</Icon>
+              <P>Validar outro voucher</P>
+            </IconAndText>
+          </Link>
 
           {/* *************** */}
           {/* List of Rewards */}
           {/* *************** */}
           <div>
-            <Stack>
-            {this.state.rewards.map(reward => (
-              <Card key={reward._id}>
-                <H2 style={Style.rewardCardTitle}>{truncate(reward.name, 50)}</H2>
-                <img src={reward.images[0]} alt=''/>
-                <P style={Style.rewardCardDescription}>
-                  {truncate(reward.description, 140)}
-                </P>
-                <P>
-                  {reward.stock > 10 ? 
-                    <b>Em Estoque</b> :
-                    reward.stock > 0 ?
-                    <b style={Style.redText}>Últimas uinidades</b> :
-                    <b>Esgotado</b>
-                  }
-                </P>
-                <Button onClick={() => this.toggleModal(reward)}>Ver Mais</Button>
-              </Card>
+            {dividedRewards.map(rewardCategory => (
+              rewardCategory.rewards.length > 0 &&
+              <React.Fragment key={rewardCategory.points}>
+                <PointsHeading>Recompensas de {rewardCategory.points} pontos</PointsHeading>
+                <Stack>
+                  
+                  {rewardCategory.rewards.map(reward => (
+                    <Card key={reward._id} textCenter style={{
+                      opacity: this.props.selectedVoucher.points < reward.points ? '0.5' : '1'
+                    }}>
+                      <H2 style={Style.rewardCardTitle}>{truncate(reward.name, 50)}</H2>
+                      <img className='fullWidth' src={reward.images[0]} alt=''/>
+                      <LogoThumbnail>
+                        <img src={reward.company.logo} alt=''/>
+                      </LogoThumbnail>
+                      <P style={Style.rewardCardDescription}>
+                        {truncate(reward.description, 140)}
+                      </P>
+                      <P>
+                        <i>{reward.points} pontos</i>
+                      </P>
+                      <P>
+                        {reward.stock > 10 ? 
+                          <b>Em Estoque</b> :
+                          reward.stock > 0 ?
+                          <b style={Style.redText}>Últimas unidades</b> :
+                          <b>Esgotado</b>
+                        }
+                      </P>
+                      <Button onClick={() => this.toggleModal(reward)}>Ver Mais</Button>
+                    </Card>
+                  ))}
+                </Stack>
+              </React.Fragment>
             ))}
-            </Stack>
+            
             {this.state.isLoadingData && <Loading padded />}
           </div>
         </FadeIn>
@@ -148,13 +224,16 @@ class RewardList extends React.Component {
             <div style={Style.modalContent}>
               <H2>{selectedReward.name}</H2>
               <img style={Style.modalImage} src={selectedReward.images && selectedReward.images[0]} alt=''/>
+              <LogoThumbnail>
+                <img src={selectedReward.company.logo} alt=''/>
+              </LogoThumbnail>
               <P>{selectedReward.description}</P>
               <P>
                 Status:&nbsp;
                 {selectedReward.stock > 10 ? 
                   <b>Em Estoque</b> :
                   selectedReward.stock > 0 ?
-                  <b style={Style.redText}>Últimas uinidades</b> :
+                  <b style={Style.redText}>Últimas unidades</b> :
                   <b>Esgotado</b>
                 }
               </P>
@@ -164,15 +243,23 @@ class RewardList extends React.Component {
                 <H3>Onde retirar?</H3>
               </IconAndText>
 
-              {selectedReward.company.locations.map(location => (
-                <P style={{textAlign: 'left'}} key={location.name}>
-                  <b>{location.name}</b><br/>
-                  {location.address}
-                </P>
-              ))}
+              {selectedReward.company && selectedReward.company.locations ?
+                selectedReward.company.locations.map(location => (
+                  <P style={{textAlign: 'left'}} key={location.name}>
+                    <b>{location.name}</b><br/>
+                    {location.address}
+                  </P>
+                )) :
+                <P>Nenhuma localização disponível</P>
+              }
               
-              <Button disabled={isLoadingRewardSelection} onClick={() => this.selectReward(selectedReward)}>
-                {isLoadingRewardSelection ? <React.Fragment><Loading size={20} /> Processando...</React.Fragment> : 'Escolher este brinde'}
+              <Button disabled={isLoadingRewardSelection || notEnoughPoints} onClick={() => this.selectReward(selectedReward)}>
+                {isLoadingRewardSelection ?
+                  <React.Fragment><Loading size={20} /> Processando...</React.Fragment> :
+                notEnoughPoints ?
+                    'Você não tem pontos suficientes' :
+                    'Escolher este brinde'
+                }
               </Button>
             </div>
           }

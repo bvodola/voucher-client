@@ -6,8 +6,13 @@ const theme = {
     blue1: '#343763',
     blue2: '#202342',
     gray1: '#3c3c3c',
-    red: '#ff6d66',
-    
+    gray2: '#859ba6',
+    red: '#ff6d66', 
+    danger: '#fff',
+  },
+  bgColors: {
+    danger: '#ff6d66',
+    danger2: '#ff8877',
   }
 };
 

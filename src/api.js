@@ -240,8 +240,15 @@ const getRewards = async (fields = {}) => {
   }
 }
 
+const addReward = async (fields = {}) => {
+  try {
+    return add('reward', fields);
+  } catch(err) {
+    throw err;
+  }
+}
+
 const editReward = async (fields = {}) => {
-  console.log(fields);
   try {
     return edit('reward', fields);
   } catch(err) {
@@ -263,19 +270,74 @@ const subtractRewardStock = async (reward_id) => {
   }
 }
 
+const removeReward = async (_id) => {
+  try {
+    return remove('reward', _id);
+  } catch(err) {
+    throw err;
+  }
+}
+
+// =========
+// Companies
+// =========
+const getCompanies = async (fields = {}, returnFields = null) => {
+  try {
+    return get('companies', fields, returnFields);
+  } catch(err) {
+    throw err;
+  }
+}
+
+const addCompany = async (fields = {}) => {
+  try {
+    return add('company', fields);
+  } catch(err) {
+    throw err;
+  }
+}
+
+const editCompany = async (fields = {}) => {
+  try {
+    return edit('company', fields);
+  } catch(err) {
+    throw err;
+  }
+}
+
+const removeCompany = async (_id) => {
+  try {
+    return remove('company', _id);
+  } catch(err) {
+    throw err;
+  }
+}
 
 // =================
 // Generic functions
 // =================
-const get = async (model, fields = {}) => {
+const get = async (model, fields = {}, returnFields = null) => {
   try {
     const MODEL = model.toUpperCase();
     const res = await axios.post(
       `${BACKEND_URL}/graphql`,
-      { query: `${types[`GET_${MODEL}`](fields)}` }
+      { query: `${types[`GET_${MODEL}`](fields, returnFields)}` }
     )
     return res.data.data[model];
 
+  } catch(err) {
+    throw err;
+  }
+}
+
+const add = async (model, fields = {}) => {
+  try {
+    const MODEL = model.toUpperCase();
+    const res = await axios.post(
+      `${BACKEND_URL}/graphql`,
+      { query: `${types[`ADD_${MODEL}`](fields)}` }
+    )
+    return res.data.data;
   } catch(err) {
     throw err;
   }
@@ -289,6 +351,18 @@ const edit = async (model, fields) => {
       { query: `${types[`EDIT_${MODEL}`](fields)}` }
     )
     return res.data.data;
+  } catch(err) {
+    throw err;
+  }
+}
+
+const remove = async (model, _id) => {
+  try {
+    const MODEL = model.toUpperCase();
+    const res = await axios.post(
+      `${BACKEND_URL}/graphql`,
+      { query: `${types[`REMOVE_${MODEL}`](_id)}` }
+    )
   } catch(err) {
     throw err;
   }
@@ -313,8 +387,14 @@ const api = {
   getVouchers,
   editVoucher,
   getRewards,
+  addReward,
   editReward,
   subtractRewardStock,
+  removeReward,
+  getCompanies,
+  addCompany,
+  editCompany,
+  removeCompany,
 }
 
 export default api;

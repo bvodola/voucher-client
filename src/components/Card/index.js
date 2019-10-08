@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 const Card = styled.div`
+  cursor: ${props => typeof props.onClick === 'function' ? 'pointer' : 'auto' }
   background: #ffffff;
   border-radius: 6px;
   border: none;
@@ -10,10 +11,10 @@ const Card = styled.div`
   transition: margin 0.3s ease, box-shadow 0.3s ease;
   padding: 10px 20px 20px;
   margin: 20px 0;
-  text-align: center;
+  text-align: ${props => props.textCenter ? 'center' : 'left'};
   flex-basis: 100%;
 
-  img {
+  .fullWidth {
     margin-top: 10px;
     max-width: 100%;
     max-height: 200px;

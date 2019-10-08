@@ -1,11 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { showAlert } from 'src/state/actions/alerts'
+import { withRouter, Link } from 'react-router-dom';
 import { H1, H3, P, Label } from 'src/components/Text';
 import Icon, { IconAndText } from 'src/components/Icon';
 import styled from 'styled-components';
 import { truncate } from 'src/helpers';
 import FadeIn from 'react-fade-in';
+import config from 'src/config'
 
 const Style = {
   voucherInput: {
@@ -53,8 +55,8 @@ const ImageAndText = styled.div`
   margin-top: 20px;
 
   img {
+    align-self: center;
     width: 40%;
-    height: 100%; 
     margin-right: 10px;
   }
 
@@ -75,6 +77,11 @@ class VoucherDetails extends React.Component {
     if(typeof selectedVoucher.code === 'undefined') {
       this.props.history.push('/')
       return null;
+
+    } else if(!selectedVoucher.reward) {
+      this.props.history.push('/');
+      this.props.showAlert('danger', 'O código digitado não é válido. Por favor, tente novamente, ou se preferir, entre em contato.')
+      return null;
     } else {
       return (
         <FadeIn>
@@ -82,11 +89,25 @@ class VoucherDetails extends React.Component {
             <H1>
               Seu Voucher
             </H1>
+
+            <Link to='/' style={{textDecoration: 'none', paddingLeft: '10px', display: 'block', cursor: 'pointer'}}>
+              <IconAndText>
+                <Icon>chevron_left</Icon>
+                <P>Validar outro voucher</P>
+              </IconAndText>
+            </Link>
+
+            <a target="_blank" href={`${config.BACKEND_URL}/pdf-voucher/${selectedVoucher.code}`} style={{textDecoration: 'none', paddingLeft: '10px', display: 'block', cursor: 'pointer'}}>
+              <IconAndText>
+                <Icon>cloud_download</Icon>
+                <P>Fazer download do voucher</P>
+              </IconAndText>
+            </a>
     
             <FeatureBox>
               <Label>Código do Voucher</Label>
               <P className='featured'>{selectedVoucher.code}</P>
-              <sub>Apresente este código em um dos postos de troca abaixo</sub>
+              <sub>Apresente este código em um dos postos de troca abaixo. <b>Não esqueça de baixar (botão acima), sem o voucher você não consegue retirar seu brinde!</b></sub>
               
               <ImageAndText>
                 <img src={selectedVoucher.reward.images[0]} alt=''/>
@@ -101,12 +122,14 @@ class VoucherDetails extends React.Component {
                 <H3>Onde retirar?</H3>
               </IconAndText>
               
-              {selectedVoucher.reward.company.locations.map(location => (
+              {selectedVoucher.reward.company && selectedVoucher.reward.company ? selectedVoucher.reward.company.locations.map(location => (
                 <P>
                   <b>{location.name}</b><br/>
                   {location.address}
                 </P>
-              ))}
+                )) : 
+                <P>Nenhuma localização disponível</P>
+              }
               
             </FeatureBox>
           </div>
@@ -120,4 +143,5 @@ class VoucherDetails extends React.Component {
 export default withRouter(connect(state => ({
   selectedVoucher: state.vouchers.selectedVoucher
 }), {
+  showAlert
 })(VoucherDetails));

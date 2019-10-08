@@ -29,24 +29,28 @@ const ModalBackground = styled.div`
   padding: 20px;
 
   @media (min-width: 900px) {
-    width: 50%;
+    width: ${props => props.width || '50%'};
   }
 `;
 
-const Modal = ({isModalOpened, toggleModal, children, style, ...props}) => (
+const Modal = ({isModalOpened, toggleModal, children, style, width, showOverlay, ...props}) => (
   <Transition
     in={isModalOpened}
-    timeout={500}
+    timeout={250}
   >
     {(state) => (
       <React.Fragment>
-        <Overlay state={state} onClick={toggleModal} />
-        <ModalBackground state={state} style={style}>
+        {showOverlay && <Overlay state={state} onClick={toggleModal} />}
+        <ModalBackground state={state} style={style} width={width}>
           {children}
         </ModalBackground>
       </React.Fragment>
     )}
   </Transition>
 );
+
+Modal.defaultProps = {
+  showOverlay: true
+}
 
 export default Modal;

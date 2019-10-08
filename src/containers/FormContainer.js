@@ -1,7 +1,7 @@
 import React from 'react';
-import VMasker from 'vanilla-masker';
-import axios from  'src/services/axios';
-import StateHandler from 'src/services/stateHandler';
+import axios from  'axios';
+import StateHandler from 'src/helpers/stateHandler';
+// import VMasker from 'vanilla-masker';
 
 class FormContainer extends React.Component {
   constructor(props) {
@@ -94,7 +94,7 @@ class FormContainer extends React.Component {
     let maskedInputs = document.querySelectorAll(".masked");
     for(let i=0; i<maskedInputs.length; i++) {
       let el = maskedInputs[i];
-      VMasker(el).maskPattern(el.getAttribute('data-mask'));
+      // VMasker(el).maskPattern(el.getAttribute('data-mask'));
     }
   }
 
